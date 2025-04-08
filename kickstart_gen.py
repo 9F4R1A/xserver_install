@@ -1,7 +1,16 @@
 import os
 import shutil
 
-virtual = True
+virtual = None
+
+ans = input("the installation is virtual or physical?:(y/n) ")
+if ans == "y":
+    virtual = True
+elif ans == "n":
+    virtual = False
+else:
+    print("ERROR: invalid input")
+    raise SystemExit(1)
 
 #Copy of skeleton kickstart file
 source_skel = "Skel_Rocky9ks.cfg"
@@ -9,8 +18,11 @@ source_skel = "Skel_Rocky9ks.cfg"
 destination_ks = "Rocky9ks.cfg"
 
 if virtual == True:
-    with open(source_skel, 'r') as file:
-        lines = file.readlines()
+    try:
+        with open(source_skel, 'r') as file:
+            lines = file.readlines()
+    except FileNotFoundError:
+        print("File Skel_Rocky9ks.cfg not found!")
 
     # Modify the x-th line (0-based index)
     lines[10] = "network  --bootproto=static --device=ens18 --gateway=192.168.1.1 --ip=192.168.1.114 --nameserver=8.8.8.8,8.8.4.4 --netmask=255.255.255.0 --activate" + "\n"
