@@ -5,11 +5,11 @@ import shutil
 
 virtual = None
 
-ans_virt = input("The installation is virtual or physical?:(y/n) ")
+ans_virt = input("The installation is virtual or physical?:(v/p) ")
 ans_part = input("Full partition config?:(y/n) ")
-if ans_virt.lower() == "y":
+if ans_virt.lower() == "v":
     virtual = True
-elif ans_virt.lower() == "n":
+elif ans_virt.lower() == "p":
     virtual = False
 else:
     print("ERROR: invalid input")
@@ -25,7 +25,7 @@ else:
 
 #Copy of skeleton kickstart file
 source_skel = "Skel_Rocky9ks.cfg"
-
+keyfile = "key.pub"
 destination_ks = "Rocky9ks.cfg"
 
 if virtual == True and part == False:
@@ -52,6 +52,12 @@ if virtual == True and part == False:
             lines = file.readlines()
     except FileNotFoundError:
         print("File Skel_Rocky9ks.cfg not found!")
+    
+    try:
+        with open(keyfile, 'r') as file:
+            keylines = file.readlines()
+    except FileNotFoundError:
+        print("File key.pub not found!")
 
     # Modify the x-th line (0-based index)
     lines[10] = "network  --bootproto=static --device=ens18 --gateway=" + ans_gw + " --ip=" + ans_ipaddr + " --nameserver=8.8.8.8,8.8.4.4 --netmask=" + ans_netmask + " --activate" + "\n"
@@ -64,6 +70,7 @@ if virtual == True and part == False:
     lines[34] = "volgroup rl --pesize=4096 pv.01" + "\n"
     lines[35] = "logvol swap --fstype=\"swap\" --size=2098 --name=swap --vgname=rl" + "\n"
     lines[36] = "logvol / --fstype=\"xfs\" --grow --size=1024 --name=root --vgname=rl" + "\n"
+    lines[73] = "echo \"" + keylines[0] + "\" >> /root/.ssh/authorized_keys" + "\n"
     with open(destination_ks, 'w') as file:
         file.writelines(lines)
 
@@ -91,6 +98,12 @@ elif virtual == True and part == True:
             lines = file.readlines()
     except FileNotFoundError:
         print("File Skel_Rocky9ks.cfg not found!")
+    
+    try:
+        with open(keyfile, 'r') as file:
+            keylines = file.readlines()
+    except FileNotFoundError:
+        print("File key.pub not found!")
 
     # Modify the x-th line (0-based index)
     lines[10] = "network  --bootproto=static --device=ens18 --gateway=" + ans_gw + " --ip=" + ans_ipaddr + " --nameserver=8.8.8.8,8.8.4.4 --netmask=" + ans_netmask + " --activate" + "\n"
@@ -107,6 +120,7 @@ elif virtual == True and part == True:
     lines[52] = "logvol / --fstype=\"xfs\" --size=153600 --name=root --vgname=rl" + "\n"
     lines[53] = "logvol /tmp --fstype=\"xfs\" --size=5120 --name=tmp --vgname=rl" + "\n"
     lines[54] = "logvol /home --fstype=\"xfs\" --size=51200 --name=home --vgname=rl" + "\n"
+    lines[73] = "echo \"" + keylines[0] + "\" >> /root/.ssh/authorized_keys" + "\n"
     with open(destination_ks, 'w') as file:
         file.writelines(lines)
 
@@ -138,6 +152,12 @@ elif virtual == False:
     except FileNotFoundError:
         print("File Skel_Rocky9ks.cfg not found!")
     
+    try:
+        with open(keyfile, 'r') as file:
+            keylines = file.readlines()
+    except FileNotFoundError:
+        print("File key.pub not found!")
+
     # Modify the x-th line (0-based index)
     lines[10] = "network  --bootproto=static --device=" + ans_card + " --gateway=" + ans_gw + " --ip=" + ans_ipaddr + " --nameserver=8.8.8.8,8.8.4.4 --netmask=" + ans_netmask + " --activate" + "\n"
 
@@ -153,5 +173,6 @@ elif virtual == False:
     lines[52] = "logvol / --fstype=\"xfs\" --size=153600 --name=root --vgname=rl" + "\n"
     lines[53] = "logvol /tmp --fstype=\"xfs\" --size=5120 --name=tmp --vgname=rl" + "\n"
     lines[54] = "logvol /home --fstype=\"xfs\" --size=51200 --name=home --vgname=rl" + "\n"
+    lines[73] = "echo \"" + keylines[0] + "\" >> /root/.ssh/authorized_keys" + "\n"
     with open(destination_ks, 'w') as file:
         file.writelines(lines)
